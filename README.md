@@ -1,2 +1,2 @@
-# GB_Data_gathering
-GeekBrains Data gathering course
+# GB_Data_collection
+GeekBrains Data collection course
