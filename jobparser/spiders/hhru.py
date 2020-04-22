@@ -14,11 +14,12 @@ class HhruSpider(scrapy.Spider):
 
     def parse(self, response:HtmlResponse):
         next_page = response.xpath("//a[@class='bloko-button HH-Pager-Controls-Next HH-Pager-Control']/@href").extract_first()
-        yield response.follow(next_page, callback=self.parse)
 
         vacancy_links = response.xpath("//a[@class='bloko-link HH-LinkModifier']/@href").extract()
         for link in vacancy_links:
             yield response.follow(link, callback=self.vacancy_parce)
+
+        yield response.follow(next_page, callback=self.parse)
 
     def vacancy_parce(self, response:HtmlResponse):
         link1 = response.url
