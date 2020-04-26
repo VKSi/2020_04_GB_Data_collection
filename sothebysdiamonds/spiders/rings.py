@@ -20,7 +20,9 @@ class RingsSpider(scrapy.Spider):
     def parse_items(self, response: HtmlResponse):
         loader = ItemLoader(item=SothebysdiamondsItem(), response=response)
         loader.add_xpath('name', "//h1/text()")
-        loader.add_xpath('photos', "//div[@class='detaildot detail']/a/@data-image")
+        more_than_one_photo = response.xpath("//div[@class='detaildot detail']/a/@data-image")
+        loader.add_xpath('photos', ("//span[@class='imgzoom']/img[@class='featured']/@src",
+                                    "//div[@class='detaildot detail']/a/@data-image")[bool(more_than_one_photo)])
         loader.add_xpath('category', "//div[@class='breadcrumbs']/a/text()")
         loader.add_xpath('description', "//div[@class='description']/p//text()")
         yield loader.load_item()

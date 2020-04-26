@@ -6,7 +6,6 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 import scrapy
-import numpy as np
 from scrapy.pipelines.images import ImagesPipeline
 from pymongo import MongoClient
 
@@ -17,8 +16,10 @@ class SothebysdiamondsPipeline:
         self.mongo_base = client.diamonds
 
     def process_item(self, item, spider):
-        item['collection'] = (np.nan, item['category'][1])[len(item['category']) > 1]
-        item['collection'] = (item['collection'], item['collection'][:-2])[item['collection'][-2:] == ' >']
+        if len(item['category']) > 1:
+            item['collection'] = item['category'][1]
+            if item['collection'][-2:] == ' >':
+                item['collection'] = item['collection'][:-2]
         item['category'] = item['category'][0]
         item['category'] = item['category'][2:]
         item['price'] = item['description'][1]
@@ -30,7 +31,7 @@ class SothebysdiamondsPipeline:
 
 class SothebysdiamondsPhotosPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
-        self.name = item['name']
+        self.item_name = item['name']
         if item['photos']:
             for img in item['photos']:
                 try:
@@ -39,7 +40,7 @@ class SothebysdiamondsPhotosPipeline(ImagesPipeline):
                     print(e)
 
     def file_path(self, request, response=None, info=None):
-        directory_name = self.name
+        directory_name = self.item_name
         image_name = str(request.url).split('/')[-1]
         image_name = image_name[:image_name.find('.')]
         head_directory = self.spiderinfo.spider.name
