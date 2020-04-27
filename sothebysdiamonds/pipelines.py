@@ -9,6 +9,8 @@ import scrapy
 from scrapy.pipelines.images import ImagesPipeline
 from pymongo import MongoClient
 
+global link_to_name
+link_to_name = {}
 
 class SothebysdiamondsPipeline:
     def __init__(self):
@@ -30,8 +32,11 @@ class SothebysdiamondsPipeline:
 
 
 class SothebysdiamondsPhotosPipeline(ImagesPipeline):
+
     def get_media_requests(self, item, info):
-        self.item_name = item['name']
+        global link_to_name
+        for link in item['photos']:
+            link_to_name[link] = item['name']
         if item['photos']:
             for img in item['photos']:
                 try:
@@ -40,7 +45,7 @@ class SothebysdiamondsPhotosPipeline(ImagesPipeline):
                     print(e)
 
     def file_path(self, request, response=None, info=None):
-        directory_name = self.item_name
+        directory_name = link_to_name[request.url]
         image_name = str(request.url).split('/')[-1]
         image_name = image_name[:image_name.find('.')]
         head_directory = self.spiderinfo.spider.name
